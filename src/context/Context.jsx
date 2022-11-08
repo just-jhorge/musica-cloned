@@ -3,41 +3,40 @@ import TopMusic from "../pages/home/TopMusic";
 const Context = React.createContext();
 
 const ContextProvider = ({ children }) => {
+	const [tracksQueue, setTracksQueue] = useState(TopMusic);
+	const [musicDuration, setMusicDuration] = useState("");
+	const [isShuffle, setIsShuffle] = useState(false);
+	const [currentTime, setCurrentTime] = useState(0);
+	const [trackIndex, setTrackIndex] = useState(10);
 	const [playlistBG, setPlaylistBG] = useState();
-	const [playerSrc, setPlayerSrc] = useState(
-		"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview112/v4/cd/13/2d/cd132d9a-2449-65fe-e094-fb927d7c6c9e/mzaf_16088994795328198867.plus.aac.ep.m4a"
-	);
+	const [search, setSearch] = useState("");
 	const [audioPlayer, setAudioPlayer] = useState(
 		document.createElement("audio")
 	);
+	const [playerSrc, setPlayerSrc] = useState(
+		"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview112/v4/cd/13/2d/cd132d9a-2449-65fe-e094-fb927d7c6c9e/mzaf_16088994795328198867.plus.aac.ep.m4a"
+	);
 	const [playerDetail, setPlayerDetail] = useState({
-		cover: "https://is2-ssl.mzstatic.com/image/thumb/Music122/v4/ff/ee/a8/ffeea8ba-38af-138f-045f-013bf8072cb2/194690959790_cover.jpg/400x400cc.jpg",
+		cover:
+			"https://is2-ssl.mzstatic.com/image/thumb/Music122/v4/ff/ee/a8/ffeea8ba-38af-138f-045f-013bf8072cb2/194690959790_cover.jpg/400x400cc.jpg",
 		title: "Cough (Odo)",
 		duration: "",
 		artiste: "Empire & Kizz Daniel",
 	});
-	const [musicDuration, setMusicDuration] = useState("");
-	const [currentTime, setCurrentTime] = useState(0);
-	const [tracksQueue, setTracksQueue] = useState(TopMusic);
-	const [trackIndex, setTrackIndex] = useState(22);
-	const [isShuffle, setIsShuffle] = useState(false);
-	const [search, setSearch] = useState("");
 
 	useEffect(() => {
 		setAudioPlayer(document.querySelector("#audio-player"));
 	}, []);
 
-	const searchFilter = tracksQueue.filter(
-		(item) =>
-			item.title.toLowerCase().includes(search.toLocaleLowerCase()) ||
-			item.subtitle
-				.toLocaleLowerCase()
-				.includes(search.toLocaleLowerCase())
-	);
-
 	useEffect(() => {
 		setCurrentTrack(trackIndex);
 	}, [trackIndex]);
+
+	const searchFilter = tracksQueue.filter(
+		(item) =>
+			item.title.toLowerCase().includes(search.toLocaleLowerCase()) ||
+			item.subtitle.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+	);
 
 	const continuePlay = () => {
 		audioPlayer.play();
@@ -67,9 +66,7 @@ const ContextProvider = ({ children }) => {
 
 		audioPlayer.onloadedmetadata = () => {
 			setMusicDuration(audioPlayer.duration);
-			setCurrentTime(
-				(audioPlayer.currentTime / audioPlayer.duration) * 100
-			);
+			setCurrentTime((audioPlayer.currentTime / audioPlayer.duration) * 100);
 			continuePlay();
 		};
 	};
@@ -106,6 +103,15 @@ const ContextProvider = ({ children }) => {
 		setCurrentTime(index);
 	};
 
+	const millisecondsToMinute = (milliseconds) => {
+		const second = Math.floor(milliseconds / 1000);
+		const minute = Math.floor(second / 60);
+		const seconds = Math.floor(second % 60);
+		return `${minute.toString().padStart(2, "0")} : ${seconds
+			.toString()
+			.padStart(2, "0")}`;
+	};
+
 	audioPlayer.onended = () => {
 		nextTrack();
 	};
@@ -114,15 +120,6 @@ const ContextProvider = ({ children }) => {
 		setCurrentTime(
 			((audioPlayer.currentTime / musicDuration) * 100).toFixed(2)
 		);
-	};
-
-	const millisecondsToMinute = (milliseconds) => {
-		const second = Math.floor(milliseconds / 1000);
-		const minute = Math.floor(second / 60);
-		const seconds = Math.floor(second % 60);
-		return `${minute.toString().padStart(2, "0")} : ${seconds
-			.toString()
-			.padStart(2, "0")}`;
 	};
 
 	const contextValue = {
